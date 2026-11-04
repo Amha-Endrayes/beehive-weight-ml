@@ -1,12 +1,11 @@
-Model,Features Used,Evaluation Strategy,MAE (g),RMSE (g),R2,Notes
-Global Mean,Intercept Only,Chronological Future (2022),9420.5,11812.3,0.0000,Predicts dataset population mean (38.4 kg)
-Colony Historical Mean,Colony ID Target Encoding,Chronological Future (2022),3210.4,4152.8,0.7421,Captures static hardware tare
-Diurnal + Seasonal Splines,Hour + Day of Year Basis,Chronological Future (2022),3085.2,3980.5,0.7634,Annual bell curve
-Linear Regression (OLS),Sensors + Cyclical,Chronological Future (2022),2840.1,3621.7,0.8120,Linear underfit
-Ridge Regression (L2),Sensors + Lags + Cyclical,Chronological Future (2022),2715.6,3490.2,0.8255,Regularized weights across probes
-Random Forest (100 Trees),All Non-Weight Features,Chronological Future (2022),2180.3,2948.6,0.8752,Threshold flight cutoffs
-HistGradientBoosting,All Non-Weight Features,Chronological Future (2022),1942.8,2681.4,0.8984,Best on known hives (~1.9 kg MAE)
-HistGBDT (Zero-Shot),All Non-Weight Features,Leave-Colony-Out (Unseen),8652.4,10918.7,-0.1240,FAILS on unseen colonies
-HistGBDT + 1-Day Calib.,Non-Weight + 24h Tare,Leave-Colony-Out (Unseen),1824.5,2412.0,0.9122,24h scale tare restores high accuracy
-HistGBDT + 7-Day Calib.,Non-Weight + 7d Baseline,Leave-Colony-Out (Unseen),1241.6,1682.3,0.9560,Calibrates thermal mass and core rate
-Autoregressive Benchmark,Non-Weight + Lag W_(t-1h),Chronological Future (2022),84.5,141.8,0.9998,Requires active scale
+Model Architecture,Feature Representation,Evaluation Strategy,MAE (g),RMSE (g),R2,Operational Interpretation
+Global Mean Baseline,Intercept Only,Future Chronological,7586.5,9461.0,-0.4829,Predicts constant population mean (34.3 kg)
+Colony Historical Mean,Colony ID Target Encoding,Future Chronological,3625.7,4394.3,0.6801,Captures static hardware tare per hive
+Diurnal + Seasonal Splines,Hour + Day of Year Basis,Future Chronological,3510.2,4280.5,0.6950,Tracks annual phenological bell curve
+Linear Regression (OLS),Sensors + Cyclical,Future Chronological,11956.1,14248.0,-2.3631,Severe collinearity across internal probes
+Ridge Regression (L2),Sensors + Lags + Cyclical,Future Chronological,8420.3,10210.5,-0.7240,L2 shrinkage partially mitigates probe collinearity
+Gradient Boosted Regressor,All Non-Weight Features,Future Chronological,7550.3,9556.7,-0.5130,Captures non-linear thresholds; drifts over long gaps
+GBDT (Zero-Shot),All Non-Weight Features,Leave-Colony-Out,11008.9,13017.3,-1.4212,FAILS on unseen colonies without calibration
+GBDT + 24h Calib.,Non-Weight + 24h Tare Offset,Leave-Colony-Out,4838.3,6291.9,0.4299,24h Tare anchor restores predictive skill
+GBDT + 7-Day Calib.,Non-Weight + 7d Baseline Fit,Leave-Colony-Out,3120.4,4280.1,0.7180,Calibrates colony-specific thermal mass
+Autoregressive Benchmark,Non-Weight + Lag W_(t-1h),Future Chronological,92.4,185.2,0.9995,Active scale baseline (trivial prediction)
