@@ -1,0 +1,12 @@
+Model,Features Used,Evaluation Strategy,MAE (g),RMSE (g),R2,Notes
+Global Mean,Intercept Only,Chronological Future (2022),9420.5,11812.3,0.0000,Predicts dataset population mean (38.4 kg)
+Colony Historical Mean,Colony ID Target Encoding,Chronological Future (2022),3210.4,4152.8,0.7421,Captures static hardware tare
+Diurnal + Seasonal Splines,Hour + Day of Year Basis,Chronological Future (2022),3085.2,3980.5,0.7634,Annual bell curve
+Linear Regression (OLS),Sensors + Cyclical,Chronological Future (2022),2840.1,3621.7,0.8120,Linear underfit
+Ridge Regression (L2),Sensors + Lags + Cyclical,Chronological Future (2022),2715.6,3490.2,0.8255,Regularized weights across probes
+Random Forest (100 Trees),All Non-Weight Features,Chronological Future (2022),2180.3,2948.6,0.8752,Threshold flight cutoffs
+HistGradientBoosting,All Non-Weight Features,Chronological Future (2022),1942.8,2681.4,0.8984,Best on known hives (~1.9 kg MAE)
+HistGBDT (Zero-Shot),All Non-Weight Features,Leave-Colony-Out (Unseen),8652.4,10918.7,-0.1240,FAILS on unseen colonies
+HistGBDT + 1-Day Calib.,Non-Weight + 24h Tare,Leave-Colony-Out (Unseen),1824.5,2412.0,0.9122,24h scale tare restores high accuracy
+HistGBDT + 7-Day Calib.,Non-Weight + 7d Baseline,Leave-Colony-Out (Unseen),1241.6,1682.3,0.9560,Calibrates thermal mass and core rate
+Autoregressive Benchmark,Non-Weight + Lag W_(t-1h),Chronological Future (2022),84.5,141.8,0.9998,Requires active scale

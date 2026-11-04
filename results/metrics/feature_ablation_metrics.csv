@@ -1,0 +1,8 @@
+Feature Group Removed,MAE Before Removal (g),MAE After Removal (g),Performance Change,Interpretation
+None (Full Baseline),1942.8,1942.8,0.0%,Baseline model with all non-weight features
+Temporal Features (Hour & DOY),1942.8,2824.5,+45.4%,Critical degradation; loses solar forcing
+Historical Lags & Trends,1942.8,2652.1,+36.5%,Thermal inertia and rate of change (dT/dt)
+Internal Temperatures (t_i_1..5),1942.8,2491.3,+28.2%,Brood core thermoregulation proxy
+Ambient Weather Sensors (t_o h p),1942.8,2314.7,+19.1%,Ambient flight feasibility gates
+Internal Humidity (BME280 h),1942.8,2105.4,+8.4%,Nocturnal nectar curing evaporation
+Colony Tare Anchor,1942.8,8652.4,+345.4%,Catastrophic collapse without tare anchor

@@ -1,0 +1,27 @@
+# Python Bytecode and Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Environments
+env/
+venv/
+ENV/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+*-checkpoint.ipynb
+
+# Data and Artifacts (Large Files)
+data/original/*.zip
+data/original/*.csv
+data/processed/*.csv
+*.joblib
+*.pkl
+
+# OS Files
+.DS_Store
+Thumbs.db

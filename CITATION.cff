@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software or research findings, please cite it as below."
+title: "Can Machine Learning Estimate Beehive Weight Without a Scale? An Empirical Investigation on 78 Honeybee Colonies in Germany (2019–2022)"
+authors:
+  - family-names: "Endrayes"
+    given-names: "Amha"
+    affiliation: "Robox AI and Robotics Center, Addis Ababa, Ethiopia"
+  - family-names: "Behailu"
+    given-names: "Natnael"
+    affiliation: "Robox AI and Robotics Center, Addis Ababa, Ethiopia"
+    role: "Project Director"
+date-released: 2026-11-04
+version: "1.0.0"
+repository-code: "https://github.com/Robox-AI/beehive-weight-ml"
+keywords:
+  - "precision apiculture"
+  - "time series forecasting"
+  - "machine learning"
+  - "gradient boosted trees"
+  - "iot sensor networks"
+  - "honeybee monitoring"
+license: "MIT"

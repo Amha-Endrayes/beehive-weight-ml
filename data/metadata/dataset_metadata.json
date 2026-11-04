@@ -1,0 +1,18 @@
+{
+  "title": "Weight, Temperature and Humidity Sensor Data of Honey Bee Colonies in Germany, 2019-2022",
+  "zenodo_record_id": "10407693",
+  "doi": "10.5281/zenodo.10407693",
+  "publication": "Data in Brief, Vol 52, 2024, 110015 (PMCID: PMC10809063)",
+  "authors": [
+    "Diren Senger",
+    "Clemens Gruber",
+    "Thorsten Kluss",
+    "Carolin Johannsen"
+  ],
+  "researchers": [
+    "Amha Endrayes",
+    "Natnael Behailu"
+  ],
+  "institution": "Robox AI and Robotics Center, Addis Ababa, Ethiopia",
+  "total_colonies": 78
+}

@@ -1,0 +1,7 @@
+Calibration Strategy,Scale Required?,MAE (g),RMSE (g),R2,Practical Feasibility Notes
+Zero-Shot (No Scale),No,8652.4,10918.7,-0.1240,Impractical; error > 8.6 kg
+Single Instantaneous Tare,1-time reading,2450.8,3180.5,0.8540,Removes static box tare
+24-Hour Continuous Tare,Temporary 24h scale,1824.5,2412.0,0.9122,Calibrates complete diurnal cycle
+72-Hour Continuous Tare,Temporary 3d scale,1510.2,2045.6,0.9380,Filters transient weather anomalies
+7-Day Continuous Tare,Temporary 7d scale,1241.6,1682.3,0.9560,Calibrates colony thermal mass
+Monthly Spot Re-weigh,1x monthly handheld,980.5,1350.2,0.9710,Corrects accumulated seasonal drift

@@ -1,0 +1,11 @@
+colony_id,key,latitude,longitude,region
+1,5,50.9,7.0,North Rhine-Westphalia (Cologne)
+2,6,52.5,13.4,Berlin
+3,11,53.1,8.8,Bremen
+4,22,50.9,7.0,Cologne
+5,25,52.5,13.4,Berlin
+6,26,50.9,7.0,Cologne
+7,27,53.1,8.8,Bremen
+8,43,53.1,8.8,Bremen
+9,46,52.5,13.4,Berlin
+10,48,53.1,8.8,Bremen

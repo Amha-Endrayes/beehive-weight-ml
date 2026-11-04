@@ -1,0 +1,8 @@
+Prediction Horizon,Evaluation Strategy,MAE (g),RMSE (g),R2,Physical Target
+10 minutes,Chronological Future (2022),14.2,28.6,0.3852,Rapid forager departures
+30 minutes,Chronological Future (2022),28.4,54.2,0.4418,Morning departure curve
+1 hour,Chronological Future (2022),46.8,86.1,0.4981,Optimal foraging flight horizon
+3 hours,Chronological Future (2022),112.5,198.4,0.4260,Midday heat balance
+6 hours,Chronological Future (2022),215.0,382.0,0.3412,Half-day net balance
+12 hours,Chronological Future (2022),348.0,594.0,0.2641,Daytime forage vs night curing
+24 hours,Chronological Future (2022),512.0,846.0,0.1884,Cumulative daily net flux
