@@ -1,14 +1,20 @@
-\documentclass[journal,10pt,twocolumn]{article}
+\documentclass[10pt,twocolumn]{article}
 
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{rotating}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{caption}
 \usepackage{geometry}
 \geometry{a4paper, margin=0.75in}
 
-\title{\textbf{Can Machine Learning Estimate Beehive Weight Without a Scale?\\An Empirical Investigation on 78 Honeybee Colonies in Germany (2019--2022)}}
+% Captions
+\captionsetup{font=small, labelfont=bf, skip=4pt}
+
+\title{\textbf{\Large Can Machine Learning Estimate Beehive Weight Without a Scale?\\An Empirical Investigation on 78 Honeybee Colonies in Germany (2019--2022)}}
 
 \author{
   \textbf{Amha Endrayes}$^1$, \textbf{Natnael Behailu}$^1$\\
@@ -22,6 +28,7 @@
 \maketitle
 
 \begin{abstract}
+\small
 Continuous tracking of honeybee (\textit{Apis mellifera}) colony weight is a foundational diagnostic in precision apiculture, enabling remote detection of honey flow dynamics, swarming events, and impending colony starvation. However, physical weighing platforms based on industrial load cells suffer from continuous mechanical creep, thermal strain drift, installation complexity, and hardware costs that prevent widespread deployment across apiaries. In this paper, we investigate whether machine learning models leveraging multi-point internal hive temperatures, relative humidity, barometric pressure, external weather conditions, and temporal indicators can estimate hive weight accurately enough to eliminate the physical scale. 
 
 Using an open-access 4-year dataset encompassing 78 honeybee colonies across Germany (2019--2022) with over 450,000 hourly sensor observations, we evaluate three prediction tasks: absolute weight estimation, multi-horizon weight change estimation (10 minutes to 24 hours), and phenological trend/event characterization. Our empirical results reveal that zero-shot absolute weight estimation on unseen colonies fails completely ($R^2 = -0.124$, $\text{MAE} = 8,652\text{ g}$), as static hive hardware deadweight (18--55 kg) emits no thermal signature and is physically unidentifiable from environmental telemetry. Conversely, a few-shot calibration approach using a 24-hour initial scale baseline resolves the tare offset and restores high accuracy ($R^2 = 0.912$, $\text{MAE} = 1,824\text{ g}$). Furthermore, short-term weight changes are moderately predictable (1-hour $\text{MAE} = 46.8\text{ g}$, $R^2 = 0.498$), successfully tracking diurnal forager departures and returns. We conclude that while physical scales cannot be entirely eliminated for commercial honey yield accounting, a hybrid deployment---combining a temporary 24-hour calibration scale with low-cost continuous internal sensing---provides a scalable alternative to permanent hive scales.
@@ -58,75 +65,92 @@ This study asks: Can environmental and internal sensors (multi-point digital the
 We utilize the open-access citizen-science dataset published by Senger et al. (2024), hosted at Zenodo Record 10407693.
 The dataset covers 78 unique honeybee colonies across Germany over 2019--2022. Sensor telemetry includes:
 \begin{itemize}
-    \item \textbf{Gross Hive Weight:} Bosche H30/H40 single-point strain gauge load cell with an HX711 24-bit ADC amplifier.
+    \item \textbf{Gross Hive Weight:} Bosche H30/H40 single-point strain gauge load cell with an HX711 24-bit ADC amplifier underneath the bottom board. Native precision: 1--5~g; operational range: -50 to +150~kg.
     \item \textbf{Internal Temperature Array:} 5x Dallas DS18B20 digital 1-Wire sensors ($t_{i,1}$ to $t_{i,5}$) suspended between combs. Sensor $t_{i,3}$ monitors the brood nest core ($34.5^\circ\text{C}$--$35.5^\circ\text{C}$).
     \item \textbf{Ambient Temperature:} 1x DS18B20 ($t_o$) suspended beneath the outer hive floor.
     \item \textbf{Internal Microclimate:} Bosch BME280 combined sensor measuring internal air temperature ($t$), relative humidity ($h$, 0--100\%), and barometric pressure ($p$, 300--1100 hPa).
 \end{itemize}
 
+% TABLE 1: Rotated Landscape Table using sidewaystable*
+\begin{sidewaystable*}
+\centering
+\small
+\caption{Task A: Absolute Hive Weight Estimation Benchmarks on 78 German Honeybee Colonies (2022 Chronological Holdout \& Unseen Colony Splits)}
+\label{tab:task_a}
+\vspace{0.3cm}
+\begin{tabularx}{\textheight}{@{}p{3.8cm} p{4.4cm} p{3.4cm} r r r X@{}}
+\toprule
+\textbf{Model Architecture} & \textbf{Feature Representation} & \textbf{Evaluation Strategy} & \textbf{MAE (g)} & \textbf{RMSE (g)} & $\mathbf{R^2}$ & \textbf{Operational Interpretation} \\
+\midrule
+Global Mean Baseline & Intercept Only & Chronological Future (2022) & 9,420.5 & 11,812.3 & 0.0000 & Predicts constant population mean (38.4 kg) \\
+Colony Historical Mean & Colony ID Target Encoding & Chronological Future (2022) & 3,210.4 & 4,152.8 & 0.7421 & Static hardware tare; misses seasonal flow \\
+Diurnal + Seasonal Splines & Hour + Day of Year Basis & Chronological Future (2022) & 3,085.2 & 3,980.5 & 0.7634 & Tracks annual phenological bell curve \\
+Linear Regression (OLS) & Sensors + Cyclical & Chronological Future (2022) & 2,840.1 & 3,621.7 & 0.8120 & Underfits non-linear thermal inertia \\
+Ridge Regression (L2) & Sensors + Lags + Cyclical & Chronological Future (2022) & 2,715.6 & 3,490.2 & 0.8255 & Regularizes collinear internal temperature array \\
+Random Forest (100 Trees) & All Non-Weight Features & Chronological Future (2022) & 2,180.3 & 2,948.6 & 0.8752 & Captures ambient flight thresholds ($>12^\circ\text{C}$) \\
+\textbf{HistGradientBoosting (GBDT)} & All Non-Weight Features & Chronological Future (2022) & \textbf{1,942.8} & \textbf{2,681.4} & \textbf{0.8984} & \textbf{Best model on known colonies} ($\approx 1.9\text{ kg}$ MAE) \\
+\midrule
+\textbf{HistGBDT (Zero-Shot)} & All Non-Weight Features & \textbf{Leave-Colony-Out} & \textbf{8,652.4} & \textbf{10,918.7} & \textbf{-0.1240} & \textbf{FAILS on unseen colonies without calibration} \\
+\textbf{HistGBDT + 1-Day Calib.} & Non-Weight + 24h Tare Offset & \textbf{Leave-Colony-Out} & \textbf{1,824.5} & \textbf{2,412.0} & \textbf{0.9122} & \textbf{24h Tare anchor restores high accuracy} \\
+\textbf{HistGBDT + 7-Day Calib.} & Non-Weight + 7d Baseline Fit & \textbf{Leave-Colony-Out} & \textbf{1,241.6} & \textbf{1,682.3} & \textbf{0.9560} & \textbf{Calibrates colony-specific thermal mass} \\
+\midrule
+\textit{Autoregressive Benchmark} & Non-Weight + Lag $W_{t-1\text{h}}$ & Chronological Future (2022) & 84.5 & 141.8 & 0.9998 & Active scale baseline (trivial prediction) \\
+\bottomrule
+\end{tabularx}
+\end{sidewaystable*}
+
 \section{Experimental Results}
+We evaluated models across three benchmark experiments reflecting our formal hypotheses.
+
+\subsection{Task A: Absolute Weight Estimation}
+Table~\ref{tab:task_a} (presented in landscape orientation) details the comparative performance of baseline and machine learning models on chronological future data (2022 holdout) and unseen colony splits. On previously seen colonies where historical tare is learned, HistGradientBoosting achieves an MAE of 1,942.8~g ($R^2 = 0.8984$). However, when evaluated in a zero-shot setting on unseen colonies (Leave-Colony-Out), the model completely collapses ($R^2 = -0.1240$, $\text{MAE} = 8,652.4\text{ g}$), confirming Hypothesis~1. Anchoring the model with a 24-hour scale tare restores performance to an MAE of 1,824.5~g ($R^2 = 0.9122$), validating Hypothesis~2.
+
+\subsection{Task B: Relative Weight Change Estimation}
+Table~\ref{tab:task_b} evaluates weight change prediction across multiple time horizons $\Delta t$. The 1-hour horizon yields the highest predictive skill ($\text{MAE} = 46.8\text{ g}$, $R^2 = 0.4981$), directly capturing worker flight departures. For longer horizons (12h and 24h), error accumulates significantly ($\text{MAE} = 512.0\text{ g}$, $R^2 = 0.1884$), as internal sensors cannot observe floral nectar yields, confirming Hypotheses~3 and 4.
+
+\subsection{Feature Ablation Analysis}
+Table~\ref{tab:ablation} isolates the predictive contribution of each feature group. Removing temporal cyclical encodings (Hour, DOY) causes the largest degradation (+45.4\% MAE), followed by historical sensor lags (+36.5\% MAE) and internal temperature array (+28.2\% MAE).
 
 \begin{table*}[t]
 \centering
-\caption{Task A: Absolute Hive Weight Estimation Benchmarks (2022 Chronological Holdout)}
-\label{tab:task_a}
-\begin{tabular}{lllcccc}
+\small
+\caption{Task B: Relative Weight Change ($\Delta W$) Multi-Horizon Evaluation Across All 78 Colonies}
+\label{tab:task_b}
+\vspace{0.1cm}
+\begin{tabularx}{\textwidth}{l c c c X}
 \toprule
-\textbf{Model} & \textbf{Features Used} & \textbf{Evaluation Strategy} & \textbf{MAE (g)} & \textbf{RMSE (g)} & $\mathbf{R^2}$ & \textbf{Operational Note} \\
+\textbf{Horizon ($\Delta t$)} & \textbf{MAE (g)} & \textbf{RMSE (g)} & $\mathbf{R^2}$ & \textbf{Physical Target and Biological Dynamics} \\
 \midrule
-Global Mean Baseline & Intercept Only & Chronological Future & 9,420.5 & 11,812.3 & 0.0000 & Population mean \\
-Colony Historical Mean & Colony ID Target Encoding & Chronological Future & 3,210.4 & 4,152.8 & 0.7421 & Static hardware tare \\
-Diurnal + Seasonal Splines & Hour + Day of Year Basis & Chronological Future & 3,085.2 & 3,980.5 & 0.7634 & Annual bell curve \\
-Linear Regression (OLS) & Sensors + Cyclical & Chronological Future & 2,840.1 & 3,621.7 & 0.8120 & Linear underfit \\
-Ridge Regression (L2) & Sensors + Lags + Cyclical & Chronological Future & 2,715.6 & 3,490.2 & 0.8255 & Regularized L2 \\
-Random Forest (100 Trees) & All Non-Weight Features & Chronological Future & 2,180.3 & 2,948.6 & 0.8752 & Threshold non-linear \\
-\textbf{HistGradientBoosting} & All Non-Weight Features & Chronological Future & \textbf{1,942.8} & \textbf{2,681.4} & \textbf{0.8984} & \textbf{Best on known hives} \\
-\midrule
-\textbf{HistGBDT (Zero-Shot)} & All Non-Weight Features & \textbf{Leave-Colony-Out} & \textbf{8,652.4} & \textbf{10,918.7} & \textbf{-0.1240} & \textbf{Fails on unseen hives} \\
-\textbf{HistGBDT + 1-Day Calib.} & Non-Weight + 24h Tare & \textbf{Leave-Colony-Out} & \textbf{1,824.5} & \textbf{2,412.0} & \textbf{0.9122} & \textbf{24h Tare restores skill} \\
-\textbf{HistGBDT + 7-Day Calib.} & Non-Weight + 7d Fit & \textbf{Leave-Colony-Out} & \textbf{1,241.6} & \textbf{1,682.3} & \textbf{0.9560} & \textbf{Calibrates thermal mass} \\
-\midrule
-\textit{Autoregressive Benchmark} & Non-Weight + $W_{t-1\text{h}}$ & Chronological Future & 84.5 & 141.8 & 0.9998 & Active scale baseline \\
+10 minutes & 14.2 & 28.6 & 0.3852 & Rapid forager exits; measurement noise floor is $\approx 5$--$10\text{ g}$ \\
+30 minutes & 28.4 & 54.2 & 0.4418 & Morning departure curve correlated with ambient solar heating \\
+\textbf{1 hour} & \textbf{46.8} & \textbf{86.1} & \textbf{0.4981} & \textbf{Optimal flight window; strongest coupling with diurnal foraging mass loss} \\
+3 hours & 112.5 & 198.4 & 0.4260 & Sustained midday foraging activity and brood thermal stabilization \\
+6 hours & 215.0 & 382.0 & 0.3412 & Half-day net balance between morning departures and afternoon returns \\
+12 hours & 348.0 & 594.0 & 0.2641 & Daytime net forage intake vs. nocturnal nectar curing and moisture evaporation \\
+24 hours & 512.0 & 846.0 & 0.1884 & Cumulative daily net flux; reflects unobserved external floral nectar variance \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \end{table*}
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
-\caption{Task B: Relative Weight Change ($\Delta W$) Multi-Horizon Evaluation}
-\label{tab:task_b}
-\begin{tabular}{lcccc}
-\toprule
-\textbf{Horizon ($\Delta t$)} & \textbf{MAE (g)} & \textbf{RMSE (g)} & $\mathbf{R^2}$ & \textbf{Physical Target} \\
-\midrule
-10 minutes & 14.2 & 28.6 & 0.3852 & Rapid forager exits \\
-30 minutes & 28.4 & 54.2 & 0.4418 & Morning departure \\
-\textbf{1 hour} & \textbf{46.8} & \textbf{86.1} & \textbf{0.4981} & \textbf{Optimal foraging flight} \\
-3 hours & 112.5 & 198.4 & 0.4260 & Midday heat balance \\
-6 hours & 215.0 & 382.0 & 0.3412 & Half-day net balance \\
-12 hours & 348.0 & 594.0 & 0.2641 & Day flight vs night cure \\
-24 hours & 512.0 & 846.0 & 0.1884 & Cumulative daily flux \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\begin{table}[h]
-\centering
-\caption{Feature Ablation Analysis (Baseline MAE = 1,942.8 g)}
+\small
+\caption{Systematic Feature Ablation Analysis (Baseline HistGBDT Model MAE = 1,942.8 g)}
 \label{tab:ablation}
-\begin{tabular}{lccc}
+\vspace{0.1cm}
+\begin{tabularx}{\textwidth}{l c c X}
 \toprule
-\textbf{Removed Feature Group} & \textbf{New MAE} & \textbf{Change} & \textbf{Impact} \\
+\textbf{Ablated Feature Group} & \textbf{Ablated MAE (g)} & \textbf{Degradation ($\Delta$ MAE)} & \textbf{Scientific Interpretation and Physical Impact} \\
 \midrule
-Temporal (Hour, DOY) & 2,824.5 g & +45.4\% & Critical \\
-Historical Lags \& Trends & 2,652.1 g & +36.5\% & Severe \\
-Internal Temperatures & 2,491.3 g & +28.2\% & Moderate \\
-Ambient Weather ($T_o, h, p$) & 2,314.7 g & +19.1\% & Flight gate \\
-Internal Humidity ($h$) & 2,105.4 g & +8.4\% & Curing proxy \\
-Colony Tare Anchor & 8,652.4 g & +345.4\% & Total collapse \\
+Temporal Encodings (Hour, DOY) & 2,824.5 & +45.4\% & Critical loss of diurnal solar forcing and annual floral phenology cycles \\
+Historical Sensor Lags & 2,652.1 & +36.5\% & Loss of thermal momentum and derivative rate-of-change ($\frac{dT}{dt}$) \\
+Internal Temperatures ($t_{i,1\dots 5}$) & 2,491.3 & +28.2\% & Loss of core brood thermoregulation proxy ($34.8^\circ\text{C}$) and colony size indicator \\
+Ambient Weather Sensors ($t_o, h, p$) & 2,314.7 & +19.1\% & Removal of ambient flight feasibility gates ($>12^\circ\text{C}$ and barometric fronts) \\
+Internal Relative Humidity ($h$) & 2,105.4 & +8.4\% & Loss of nocturnal fanning and active nectar moisture evaporation signal \\
+Colony Tare Anchor Baseline & 8,652.4 & +345.4\% & Catastrophic collapse; confirms static hardware mass is unidentifiable without tare \\
 \bottomrule
-\end{tabular}
-\end{table}
+\end{tabularx}
+\end{table*}
 
 \section{Discussion and Feasibility Classification}
 Our empirical findings support a \textbf{Hybrid B \& C Feasibility Classification}:
@@ -141,11 +165,14 @@ Physical weighing scales cannot be completely eliminated if beekeepers require c
 \section*{Acknowledgments}
 This research was conducted at the Robox AI and Robotics Center (Addis Ababa, Ethiopia) under the direction of Mr. Natnael Behailu. We gratefully acknowledge the open-access citizen-science dataset provided by Diren Senger and colleagues at the University of Bremen and the Hiveeyes project.
 
+{\small
 \begin{thebibliography}{00}
+\setlength{\itemsep}{1pt}
 \bibitem{senger2024} D. Senger, C. Gruber, T. Kluss, and C. Johannsen, ``Weight, temperature and humidity sensor data of honey bee colonies in Germany, 2019--2022,'' \textit{Data in Brief}, vol. 52, p. 110015, 2024.
 \bibitem{meikle2015} W. G. Meikle and N. Holst, ``Application of continuous monitoring of honeybee colonies,'' \textit{Apidologie}, vol. 46, no. 1, pp. 10--22, 2015.
 \bibitem{cecchi2020} S. Cecchi et al., ``Smart In-Hive Monitoring: A Review of Available Technologies,'' \textit{Sensors}, vol. 20, no. 24, p. 7245, 2020.
 \bibitem{robustillo2026} P. Robustillo et al., ``Hive Neural Network Forecasting: Code and Preprocessed Dataset,'' \textit{Mendeley Data}, V1, 2026.
 \end{thebibliography}
+}
 
 \end{document}
